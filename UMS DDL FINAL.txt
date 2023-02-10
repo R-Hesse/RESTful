@@ -1,0 +1,121 @@
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+DROP SCHEMA IF EXISTS `ums`;
+
+CREATE SCHEMA IF NOT EXISTS `ums` DEFAULT CHARACTER SET utf8;
+
+DROP TABLE IF EXISTS `ums`.`last_visit`;
+CREATE TABLE `ums`.`last_visit` (
+  `id` varchar(36) NOT NULL,
+  `in` varchar(36) NULL,
+  `out` varchar(36) NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
+
+DROP TABLE IF EXISTS `ums`.`roles`;
+CREATE TABLE `ums`.`roles` (
+  `id` varchar(36) NOT NULL,
+  `name` varchar(45) DEFAULT NULL,
+  `description` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
+
+DROP TABLE IF EXISTS `ums`.`users`;
+CREATE TABLE `ums`.`users` (
+  `id` varchar(36) NOT NULL,
+  `name` varchar(45) NOT NULL,
+  `email` varchar(45) NOT NULL,
+  `password` varchar(45) NOT NULL,
+  `created` varchar(36) NOT NULL,
+  `last_visit_id` varchar(36) DEFAULT NULL,
+  `token` varchar(56) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email_key` (`email`) USING BTREE,
+  KEY `fk_users_last_visit1_id` (`last_visit_id`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`last_visit_id`) REFERENCES `last_visit` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+DROP TABLE IF EXISTS `ums`.`users_has_roles`;
+CREATE TABLE `ums`.`users_has_roles` (
+  `id` varchar(36) NOT NULL,
+  `users_id` varchar(36) NOT NULL,
+  `roles_id` varchar(36) NOT NULL,
+  `publisher_id` varchar(36) NULL,
+  `subscriber_id` varchar(36) NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_users_has_roles_id` (`id`),
+  CONSTRAINT `fk_users_has_roles_roles1` FOREIGN KEY (`roles_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_users_has_roles_users` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+INSERT INTO `ums`.`last_visit` (`id`, `in`, `out`) VALUES
+(01, '1604249194', '1604249224'),
+(02, '1604249181', '1604249209'),
+(03, '1604249171', '1604249203'),
+(04, '1604249188', '1604249217'),
+(05, '1604130098', '1604130106'),
+(06, '1604130094', '1604130134');
+
+INSERT INTO `ums`.`roles` (`id`, `name`, `description`) VALUES
+(111, 'ADMIN', 'Administrative roles for the overall system'),
+(222, 'SUBSCRIBER', 'Message content consumer'),
+(333, 'PUBLISHER', 'Message content creator');
+
+INSERT INTO `ums`.`users` (`id`, `name`, `email`, `password`, `created`, `last_visit_id`) VALUES
+(uuid(), 'Wagtime Adoption', 'wagtime@rescue.ca', 'password', '1504249224', '01'),
+(uuid(), 'Dog Mom', 'silly@gmail.com', 'password', '1504249224', '02'),
+(uuid(), 'Deter\'s Dad', 'doglover@live.ca', 'password', '1604129987', '03'),
+(uuid(), 'John Dough', 'jd@email.ca', 'password', '1504249224', '04'),
+(uuid(), 'I HATE CATS', 'noobmaster@outlook.com', 'password', '1504249224', '05'),
+(uuid(), 'Ryan Hesse', 'sublimed90@gmail.com', 'password', '1504249234', '06');
+
+INSERT INTO `ums`.`users_has_roles` (`id`, `users_id`, `roles_id`, `subscriber_id`)
+SELECT  uuid(), `users`.`id`, "222", "01"
+FROM `ums`.`users` WHERE `users`.`name` = "Ryan Hesse";
+
+INSERT INTO `ums`.`users_has_roles` (`id`, `users_id`, `roles_id`, `publisher_id`)
+SELECT  uuid(), `users`.`id`, "333", "01"
+FROM `ums`.`users` WHERE `users`.`name` = "Ryan Hesse";
+
+INSERT INTO `ums`.`users_has_roles` (`id`, `users_id`, `roles_id`, `publisher_id`)
+SELECT  uuid(), `users`.`id`, "333", "02"
+FROM `ums`.`users` WHERE `users`.`name` = "Wagtime Adoption";
+
+INSERT INTO `ums`.`users_has_roles` (`id`, `users_id`, `roles_id`,`subscriber_id`)
+SELECT  uuid(), `users`.`id`, "222", "03"
+FROM `ums`.`users` WHERE `users`.`name` = "Dog Mom";
+
+INSERT INTO `ums`.`users_has_roles` (`id`, `users_id`, `roles_id`, `publisher_id`)
+SELECT  uuid(), `users`.`id`, "333", "03"
+FROM `ums`.`users` WHERE `users`.`name` = "Dog Mom";
+
+INSERT INTO `ums`.`users_has_roles` (`id`, `users_id`, `roles_id`,`subscriber_id`)
+SELECT  uuid(), `users`.`id`, "222", "04"
+FROM `ums`.`users` WHERE `users`.`name` = "Deter\'s Dad";
+
+INSERT INTO `ums`.`users_has_roles` (`id`, `users_id`, `roles_id`, `publisher_id`)
+SELECT  uuid(), `users`.`id`, "333", "04"
+FROM `ums`.`users` WHERE `users`.`name` = "Deter\'s Dad";
+
+INSERT INTO `ums`.`users_has_roles` (`id`, `users_id`, `roles_id`, `subscriber_id`)
+SELECT  uuid(), `users`.`id`, "222", "05"
+FROM `ums`.`users` WHERE `users`.`name` = "John Dough";
+
+INSERT INTO `ums`.`users_has_roles` (`id`, `users_id`, `roles_id`, `subscriber_id`)
+SELECT  uuid(), `users`.`id`, "222", "06"
+FROM `ums`.`users` WHERE `users`.`name` = "I HATE CATS";
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
